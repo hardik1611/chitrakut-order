@@ -30,19 +30,19 @@ export class OrderComponent implements OnInit {
     });
 
     this.numbers.forEach((num: any, i: any) => {
-      // this.addShades(num, false);
-      if(i%2 === 0){
+      this.addShades(num, false);
+      /* if(i%3 === 0){
         this.addShades(num, true);
       }else{
         this.addShades(num, false);
-      }
+      } */
     });
 
-    // this.checkAndDeleteExpiredData();
+    this.checkAndDeleteExpiredData();
   }
 
   addShades(num: any, val: any) {
-    let creds = this.orderForm.controls['shades'] as FormArray;
+    /* let creds = this.orderForm.controls['shades'] as FormArray;
     if (val) {
       this.shadesArray().push(
         this.fb.group({
@@ -51,7 +51,7 @@ export class OrderComponent implements OnInit {
           sel: '30',
         })
       );
-    } else {
+    } else { */
       this.shadesArray().push(
         this.fb.group({
           num: num,
@@ -59,7 +59,7 @@ export class OrderComponent implements OnInit {
           sel: '',
         })
       );
-    }
+    // }
   }
 
   increaseNum(i: any) {
@@ -119,7 +119,7 @@ export class OrderComponent implements OnInit {
 
   storeData() {
     const now = new Date();
-    const expirationDate = new Date(now.getTime() + (1 * 24 * 60 * 60 * 1000));
+    const expirationDate = new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000);
     const data = {
       value: this.orderForm.getRawValue(),
       expiration: expirationDate.getTime(),
@@ -146,15 +146,13 @@ export class OrderComponent implements OnInit {
     this.shadesArray().at(i).get('qty')?.setValue(e.value);
     this.setPrintData();
     this.storeData();
-
-   
   }
 
-  sumFn(){
-this.totalOrderQty = 0;
-this.printData.forEach((itm:any)=>{
-  this.totalOrderQty = this.totalOrderQty + parseInt(itm.qty);
-})
+  sumFn() {
+    this.totalOrderQty = 0;
+    this.printData.forEach((itm: any) => {
+      this.totalOrderQty = this.totalOrderQty + parseInt(itm.qty);
+    });
   }
   setPrintData() {
     // this.printData = this.orderForm.getRawValue().shades;
