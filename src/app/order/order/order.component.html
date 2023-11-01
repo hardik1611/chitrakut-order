@@ -1,0 +1,800 @@
+<mat-sidenav-container class="example-container">
+    <mat-sidenav-content>
+
+        <mat-card id="example" class="example-card">
+            <mat-card-header>
+                <mat-card-title>
+                    <div class="head">
+                        <div class="font-chitra">ચિત્રકૂટ ઓર્ડર
+                            <div class="ml-5">({{todayDate | date:'dd-MM-YYYY'}})</div>
+                        </div>
+
+                        <div class="num-box-div">
+                            <div class="num-box">
+                                <div class="num-val">નંબર :&nbsp;</div>
+                                <div class="box-val">{{printData?.length}}</div>
+                            </div>
+                            <div class="num-box">
+                                <div class="num-val">બૉક્સ :&nbsp;</div>
+                                <div class="box-val">{{totalOrderQty}}</div>
+                            </div>
+
+                        </div>
+
+                        <button (click)="clearAll()" mat-fab color="primary">
+                            <mat-icon>refresh</mat-icon>
+                        </button>
+
+                        <button (click)="gotoBottom()" mat-fab class="mat-fab" color="primary">
+                            <mat-icon>swipe_down</mat-icon>
+                        </button>
+
+                        <button mat-raised-button color="primary" class="pdf-btn" (click)="openPDF()">PDF</button>
+                    </div>
+                    <div class="head p-rel">
+                        <input class="form-control search-b" type="text" name="search" [(ngModel)]="searchText"
+                            placeholder="Search">
+                        <mat-icon *ngIf="searchText" (click)="clearsearchFn()" class="p-abs-icon">close</mat-icon>
+                    </div>
+
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <form [formGroup]="orderForm">
+                    <cdk-virtual-scroll-viewport itemSize="60" class="virtual-scroll-lock">
+                        <div *cdkVirtualFor="let creds of shadesArray().controls | filter: searchText ; let i = index"
+                            class="new-shade-new" [ngClass]="{'odd-row':i%2 === 0}" formArrayName="shades">
+                            <ng-container [formGroupName]="i">
+                                <div class="shade-flex-new">
+                                    <div class="num-top-new" [ngClass]="{
+                                    'color-blue': i%2 === 0,
+                                    'color-sky-blue': i%2 != 0
+                                }">{{creds.get('num')?.value}}</div>
+
+                                    <div>
+                                        <mat-button-toggle-group [ngModelOptions]="{standalone: true}"
+                                            (change)="changeQty($event, i)" [(ngModel)]="creds.get('sel').value">
+                                            <mat-button-toggle value="0">0</mat-button-toggle>
+                                            <mat-button-toggle value="5">5</mat-button-toggle>
+                                            <mat-button-toggle value="10">10</mat-button-toggle>
+                                            <mat-button-toggle value="15">15</mat-button-toggle>
+                                            <mat-button-toggle value="20">20</mat-button-toggle>
+                                            <mat-button-toggle value="30">30</mat-button-toggle>
+                                            <mat-button-toggle value="60">60</mat-button-toggle>
+                                        </mat-button-toggle-group>
+                                    </div>
+                                </div>
+                            </ng-container>
+
+                        </div>
+                    </cdk-virtual-scroll-viewport>
+
+
+
+
+
+                    <!-- <div class="new-shade-new" [ngClass]="{'odd-row':i%2 === 0}" formArrayName="shades"
+                        *ngFor="let creds of shadesArray().controls | filter: searchText ; let i = index">
+                        <ng-container [formGroupName]="i"> -->
+                    <!-- <div class="shade-flex-new">
+                                <div class="num-top-new" [ngClass]="{
+                                    'color-blue': i%2 === 0,
+                                    'color-sky-blue': i%2 != 0
+                                }">{{creds.get('num')?.value}}</div>
+
+                                <div>
+                                    <mat-button-toggle-group (change)="changeQty($event, i)" formControlName="sel">
+                                        <mat-button-toggle value="0">0</mat-button-toggle>
+                                        <mat-button-toggle value="5">5</mat-button-toggle>
+                                        <mat-button-toggle value="10">10</mat-button-toggle>
+                                        <mat-button-toggle value="15">15</mat-button-toggle>
+                                        <mat-button-toggle value="20">20</mat-button-toggle>
+                                        <mat-button-toggle value="25">25</mat-button-toggle>
+                                        <mat-button-toggle value="30">30</mat-button-toggle>
+                                    </mat-button-toggle-group>
+                                </div>
+
+                                
+                           
+                            </div> -->
+
+                    <!-- <div class="shade-flex cust">
+                                <span class="num-top">{{creds.get('num')?.value}}</span>
+
+                                <mat-form-field class="example-full-width">
+                                    <mat-icon class="big-font color-red" matPrefix (click)="decreaseNum(i)">
+                                        indeterminate_check_box</mat-icon>
+                                    <input matInput type="text" formControlName="qty">
+                                    <mat-icon class="big-font color-green" matSuffix (click)="increaseNum(i)">add_box
+                                    </mat-icon>
+                                </mat-form-field>
+                            </div>
+                            <div>
+                                <mat-button-toggle-group (change)="changeQty($event, i)" formControlName="sel">
+                                    <mat-button-toggle value="0">0</mat-button-toggle>
+                                    <mat-button-toggle value="5">5</mat-button-toggle>
+                                    <mat-button-toggle value="10">10</mat-button-toggle>
+                                    <mat-button-toggle value="15">15</mat-button-toggle>
+                                    <mat-button-toggle value="20">20</mat-button-toggle>
+                                    <mat-button-toggle value="25">25</mat-button-toggle>
+                                    <mat-button-toggle value="30">30</mat-button-toggle>
+                                </mat-button-toggle-group>
+                            </div> -->
+                    <!--  </ng-container>
+                    </div> -->
+                </form>
+
+
+
+
+            </mat-card-content>
+
+            <div class="htmlData" size="A4" #htmlData id="htmlData">
+                <div class="continer">
+
+                    <!-- Page 1 -->
+                    <div class="d-flex flex-column gap-1 justify-content-center main-1">
+
+                        <div class="d-flex flex-row order-page">
+                            <div class="head-box">ચિત્રકૂટ ઓર્ડર</div>
+                            <div class="num-box-print head-box">
+                                <div class="num-val-print">નંબર :&nbsp;</div>
+                                <div class="box-val-print">{{printData?.length}}</div>
+                            </div>
+                            <div class="num-box-print head-box">
+                                <div class="num-val-print">બૉક્સ :&nbsp;</div>
+                                <div class="box-val-print">{{totalOrderQty}}</div>
+                            </div>
+                            <div class="head-box font-400">{{todayDate | date:'dd-MM-YYYY hh:mm a'}}</div>
+                            <div class="head-box-end font-400">Page : 1</div>
+                        </div>
+
+                        <div class="d-flex flex-row gap-1 align-items-start b-g">
+
+                            <!-- Col - 1 -->
+                            <div *ngIf="printData.length > 0">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData  | slice:0:18; let i=index">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <!-- Col - 2 -->
+                            <div *ngIf="printData.length > 18">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData | slice:18:36; let i=index">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <!-- Col - 3 -->
+                            <div *ngIf="printData.length > 36">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData  | slice:36:54">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <!-- Col - 4 -->
+                            <div *ngIf="printData.length > 54">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData | slice:54:72">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <!-- Col - 5 -->
+                            <div *ngIf="printData.length >72">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData | slice:72:90">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Col - 6 -->
+                            <div *ngIf="printData.length > 90">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData  | slice:90:108">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Page 2 -->
+                    <div *ngIf="printData.length > 108"
+                        class="d-flex flex-column gap-1 justify-content-center main-1">
+
+                        <div class="d-flex flex-row order-page">
+                            <div class="head-box">ચિત્રકૂટ ઓર્ડર</div>
+                            <div class="num-box-print head-box">
+                                <div class="num-val-print">નંબર :&nbsp;</div>
+                                <div class="box-val-print">{{printData?.length}}</div>
+                            </div>
+                            <div class="num-box-print head-box">
+                                <div class="num-val-print">બૉક્સ :&nbsp;</div>
+                                <div class="box-val-print">{{totalOrderQty}}</div>
+                            </div>
+                            <div class="head-box font-400">{{todayDate | date:'dd-MM-YYYY hh:mm a'}}</div>
+                            <div class="head-box-end font-400">Page : 2</div>
+                        </div>
+
+                        <div class="d-flex flex-row gap-1 align-items-start b-g">
+
+                            <!-- Col - 1 -->
+                            <div *ngIf="printData.length > 108">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData  | slice:108:126; let i=index">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <!-- Col - 2 -->
+                            <div *ngIf="printData.length > 126">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData | slice:126:144; let i=index">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <!-- Col - 3 -->
+                            <div *ngIf="printData.length > 144">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData  | slice:144:162">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <!-- Col - 4 -->
+                            <div *ngIf="printData.length > 162">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData | slice:162:180">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <!-- Col - 5 -->
+                            <div *ngIf="printData.length >180">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData | slice:180:198">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Col - 6 -->
+                            <div *ngIf="printData.length > 198">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData  | slice:198:216">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Page 3 -->
+                    <div *ngIf="printData.length > 216"
+                        class="d-flex flex-column gap-1 align-items-center justify-content-center">
+
+                        <div class="d-flex flex-row gap-1 align-items-center justify-content-between order-page">
+                            <div>ચિત્રકૂટ ઓર્ડર ({{todayDate | date:'dd-MM-YYYY'}})</div>
+                            <div>Page : 3</div>
+                        </div>
+
+                        <div class="d-flex gap-1 align-items-start justify-content-center">
+                            <!-- Col - 1 -->
+                            <div *ngIf="printData.length > 216">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData  | slice:216:234; let i=index">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <!-- Col - 2 -->
+                            <div *ngIf="printData.length > 234">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData | slice:234:252; let i=index">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <!-- Col - 3 -->
+                            <div *ngIf="printData.length > 252">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData  | slice:252:270">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <!-- Col - 4 -->
+                            <div *ngIf="printData.length > 270">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData | slice:270:288">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <!-- Col - 5 -->
+                            <div *ngIf="printData.length >288">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData | slice:288:306">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Col - 6 -->
+                            <div *ngIf="printData.length > 306">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData  | slice:306:324">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Page 4 -->
+                    <div *ngIf="printData.length > 324"
+                        class="d-flex flex-column gap-1 align-items-center justify-content-center">
+
+                        <div class="d-flex flex-row gap-1 align-items-center justify-content-between order-page">
+                            <div>ચિત્રકૂટ ઓર્ડર ({{todayDate | date:'dd-MM-YYYY'}})</div>
+                            <div>Page : 4</div>
+                        </div>
+
+                        <div class="d-flex gap-1 align-items-start justify-content-center">
+                            <!-- Col - 1 -->
+                            <div *ngIf="printData.length > 324">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData  | slice:324:342; let i=index">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <!-- Col - 2 -->
+                            <div *ngIf="printData.length > 342">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData | slice:342:360; let i=index">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <!-- Col - 3 -->
+                            <div *ngIf="printData.length > 360">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData  | slice:360:378">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <!-- Col - 4 -->
+                            <div *ngIf="printData.length > 378">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData | slice:378:396">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <!-- Col - 5 -->
+                            <div *ngIf="printData.length >396">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData | slice:396:414">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Col - 6 -->
+                            <div *ngIf="printData.length > 414">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData  | slice:414:432">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Page 5 -->
+                    <div *ngIf="printData.length > 432"
+                        class="d-flex flex-column gap-1 align-items-center justify-content-center">
+
+                        <div class="d-flex flex-row gap-1 align-items-center justify-content-between order-page">
+                            <div>ચિત્રકૂટ ઓર્ડર ({{todayDate | date:'dd-MM-YYYY'}})</div>
+                            <div>Page : 5</div>
+                        </div>
+
+                        <div class="d-flex gap-1 align-items-start justify-content-center">
+                            <!-- Col - 1 -->
+                            <div *ngIf="printData.length > 432">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData  | slice:432:875; let i=index">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <!-- Col - 2 -->
+                            <div *ngIf="printData.length > 875">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData | slice:875:910; let i=index">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <!-- Col - 3 -->
+                            <div *ngIf="printData.length > 910">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData  | slice:910:945">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <!-- Col - 4 -->
+                            <div *ngIf="printData.length > 945">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData | slice:945:980">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            <!-- Col - 5 -->
+                            <div *ngIf="printData.length >980">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData | slice:980:1015">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Col - 6 -->
+                            <div *ngIf="printData.length > 1015">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th class="box-num">નંબર</th>
+                                            <th class="box-qty">નંગ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let user of printData  | slice:1015:1050">
+                                            <td class="box-num">{{user.num}}</td>
+                                            <td class="box-qty">{{user.qty}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </mat-card>
+    </mat-sidenav-content>
+</mat-sidenav-container>
