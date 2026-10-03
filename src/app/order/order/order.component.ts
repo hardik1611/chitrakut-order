@@ -1,10 +1,13 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, FormArray, FormBuilder } from '@angular/forms';
-import { BOX_NUMBER } from '../../shared/constant';
+import { BOX_NUMBER } from '../../shared/num';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { range } from 'rxjs';
 import { DatePipe } from '@angular/common';
+import * as pdfMake from 'pdfmake/build/pdfmake';
+import * as pdfFonts from 'pdfmake/build/vfs_fonts';
+(pdfMake as any).vfs = pdfFonts.vfs;
 @Component({
   selector: 'app-order',
   templateUrl: './order.component.html',
@@ -30,36 +33,20 @@ export class OrderComponent implements OnInit {
     });
 
     this.numbers.forEach((num: any, i: any) => {
-      this.addShades(num, false);
-      /* if(i%3 === 0){
-        this.addShades(num, true);
-      }else{
-        this.addShades(num, false);
-      } */
+      this.addShades(num);
     });
 
     this.checkAndDeleteExpiredData();
   }
 
-  addShades(num: any, val: any) {
-    /* let creds = this.orderForm.controls['shades'] as FormArray;
-    if (val) {
-      this.shadesArray().push(
-        this.fb.group({
-          num: num,
-          qty: [{ value: '30', disabled: true }],
-          sel: '30',
-        })
-      );
-    } else { */
-      this.shadesArray().push(
-        this.fb.group({
-          num: num,
-          qty: [{ value: 0, disabled: true }],
-          sel: '',
-        })
-      );
-    // }
+  addShades(num: any) {
+    this.shadesArray().push(
+      this.fb.group({
+        num: num,
+        qty: [{ value: 0, disabled: true }],
+        sel: '',
+      })
+    );
   }
 
   increaseNum(i: any) {
@@ -69,6 +56,7 @@ export class OrderComponent implements OnInit {
     creds.controls[i].get('qty')?.setValue(incVal);
     this.setPrintData();
   }
+
   decreaseNum(i: any) {
     let creds = this.orderForm.controls['shades'] as FormArray;
     let currVal = parseInt(creds.controls[i].get('qty')?.value);
@@ -78,6 +66,7 @@ export class OrderComponent implements OnInit {
       this.setPrintData();
     }
   }
+
   gotoBottom() {
     const element = document.getElementById('htmlData');
 
@@ -88,6 +77,7 @@ export class OrderComponent implements OnInit {
       });
     }
   }
+
   gotoUp() {
     const element = document.getElementById('example');
 
@@ -131,7 +121,7 @@ export class OrderComponent implements OnInit {
   clearAll() {
     this.shadesArray().controls.forEach((element: any) => {
       element.get('qty').setValue('0');
-      element.get('sel').setValue('');
+      element.get('sel').setValue('0');
     });
     this.setPrintData();
   }
@@ -141,8 +131,6 @@ export class OrderComponent implements OnInit {
   }
 
   changeQty(e: any, i: any) {
-    console.log('this', this.orderForm);
-
     this.shadesArray().at(i).get('qty')?.setValue(e.value);
     this.setPrintData();
     this.storeData();
@@ -154,8 +142,8 @@ export class OrderComponent implements OnInit {
       this.totalOrderQty = this.totalOrderQty + parseInt(itm.qty);
     });
   }
+
   setPrintData() {
-    // this.printData = this.orderForm.getRawValue().shades;
     let printData: any = this.orderForm.getRawValue().shades;
     this.printData = printData.filter((itm: any) => itm.qty > 0);
     this.sumFn();
@@ -202,51 +190,83 @@ export class OrderComponent implements OnInit {
 
       pdf.save(filename);
     });
+  }
 
-    // let HTML_Width = DATA?.offsetWidth || 0;
-    // let HTML_Height = DATA?.offsetHeight || 0;
-    // let top_left_margin = 15;
-    // let PDF_Width = HTML_Width + top_left_margin * 2;
-    // let PDF_Height:any = PDF_Width * 1.5 + top_left_margin * 2 || 0;
-    // let canvas_image_width = HTML_Width;
-    // let canvas_image_height = HTML_Height;
-
-    // let totalPDFPages = Math.ceil(HTML_Height / PDF_Height) - 1;
-
-    // html2canvas(DATA).then(canvas => {
-    //   canvas.getContext('2d');
-
-    //   console.log(canvas.height + '  ' + canvas.width);
-
-    //   let imgData = canvas.toDataURL('image/jpeg');
-    //   let pdf = new jsPDF('p', 'pt', [PDF_Width, PDF_Height]);
-
-    //   for (let i = 0; i <= totalPDFPages; i++) {
-    //     pdf.addPage([PDF_Width, PDF_Height],'p');
-    //     pdf.addImage(
-    //       imgData,
-    //       'JPG',
-    //       top_left_margin,
-    //       -(PDF_Height * i) + top_left_margin * 4,
-    //       canvas_image_width,
-    //       canvas_image_height
-    //     );
-    //   }
-
-    //   pdf.deletePage(1)
-
-    //   pdf.save('HTML-Document.pdf');
-    // });
-
-    // html2canvas(DATA).then((canvas) => {
-    //   let fileWidth = 208;
-    //   let fileHeight = (canvas.height * fileWidth) / canvas.width;
-    //   const FILEURI = canvas.toDataURL('image/png');
-    //   let PDF = new jsPDF('p', 'mm', 'a4');
-    //   let position = 0;
-    //   PDF.addImage(FILEURI, 'PNG', 0, position, fileWidth, fileHeight);
-    //   PDF.save('angular-demo.pdf');
-    // });
+  openPDFNew() {
+    const data = this.printData;   // [{num, qty}, ...]
+    const totalQty = this.totalOrderQty;
+    const today = new Date().toLocaleString("gu-IN", {
+      hour12: true,
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  
+    // Break into chunks of 15 rows (1 column = 15 rows)
+    const chunkSize = 25;
+    const chunkArray = (arr:any, size:any) => {
+      const result = [];
+      for (let i = 0; i < arr.length; i += size) {
+        result.push(arr.slice(i, i + size));
+      }
+      return result;
+    };
+  
+    const chunks = chunkArray(data, chunkSize);
+  
+    // Now group 6 columns = 1 page section
+    const pageColumnSize = 6;
+    const pages = chunkArray(chunks, pageColumnSize);
+  
+    const docContent:any[] = [];
+  
+    pages.forEach((pageColumns, pageIndex) => {
+  
+      // Add header
+      docContent.push({
+        margin: [10, 0, 0, 5],
+        columns: [
+          { text: "Chitrakut Order", bold: true, fontSize: 10, width: "20%" },
+          { text: today, width: "25%" },
+          { text: `Number : ${data.length}`, width: "20%" },
+          { text: `Box : ${totalQty}`, width: "20%" },
+          { text: `Page : ${pageIndex + 1}`, width: "10%", alignment: "right" }
+        ]
+      });
+  
+      const columnTables = pageColumns.map((col:any) => {
+        return {
+          width: "16%",
+          margin: [0, 0, 5, 0],
+          table: {
+            widths: ["*", "30%"],
+            body: [
+              [{ text: "Number", bold: true }, { text: "Qty", bold: true }],
+              ...col.map((item:any) => [item.num, item.qty])
+            ]
+          }
+        };
+      });
+  
+      docContent.push({
+        columns: columnTables
+      });
+  
+      docContent.push({ text: "", margin: [0, 10] });
+    });
+  
+    const docDefinition:any = {
+      pageSize: "A4",
+      defaultStyle: {
+        fontSize: 8   // change to 7 or 6 if needed
+      },
+      pageMargins: [12, 12, 20, 12],
+      content: docContent
+    };
+  
+    pdfMake.createPdf(docDefinition).download("order.pdf");
   }
 
   clearsearchFn() {

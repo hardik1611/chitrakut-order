@@ -18,7 +18,6 @@
                                 <div class="num-val">બૉક્સ :&nbsp;</div>
                                 <div class="box-val">{{totalOrderQty}}</div>
                             </div>
-
                         </div>
 
                         <button (click)="clearAll()" mat-fab color="primary">
@@ -29,13 +28,14 @@
                             <mat-icon>swipe_down</mat-icon>
                         </button>
 
-                        <button mat-raised-button color="primary" class="pdf-btn" (click)="openPDF()">PDF</button>
+                        <!-- <button mat-raised-button color="primary" class="pdf-btn" (click)="openPDF()">PDF</button> -->
+                        <button mat-raised-button color="primary" class="pdf-btn" (click)="openPDFNew()">PDF</button>
                     </div>
-                    <div class="head p-rel">
+                    <!-- <div class="head p-rel">
                         <input class="form-control search-b" type="text" name="search" [(ngModel)]="searchText"
                             placeholder="Search">
                         <mat-icon *ngIf="searchText" (click)="clearsearchFn()" class="p-abs-icon">close</mat-icon>
-                    </div>
+                    </div> -->
 
                 </mat-card-title>
             </mat-card-header>
@@ -69,65 +69,7 @@
 
                         </div>
                     </cdk-virtual-scroll-viewport>
-
-
-
-
-
-                    <!-- <div class="new-shade-new" [ngClass]="{'odd-row':i%2 === 0}" formArrayName="shades"
-                        *ngFor="let creds of shadesArray().controls | filter: searchText ; let i = index">
-                        <ng-container [formGroupName]="i"> -->
-                    <!-- <div class="shade-flex-new">
-                                <div class="num-top-new" [ngClass]="{
-                                    'color-blue': i%2 === 0,
-                                    'color-sky-blue': i%2 != 0
-                                }">{{creds.get('num')?.value}}</div>
-
-                                <div>
-                                    <mat-button-toggle-group (change)="changeQty($event, i)" formControlName="sel">
-                                        <mat-button-toggle value="0">0</mat-button-toggle>
-                                        <mat-button-toggle value="5">5</mat-button-toggle>
-                                        <mat-button-toggle value="10">10</mat-button-toggle>
-                                        <mat-button-toggle value="15">15</mat-button-toggle>
-                                        <mat-button-toggle value="20">20</mat-button-toggle>
-                                        <mat-button-toggle value="25">25</mat-button-toggle>
-                                        <mat-button-toggle value="30">30</mat-button-toggle>
-                                    </mat-button-toggle-group>
-                                </div>
-
-                                
-                           
-                            </div> -->
-
-                    <!-- <div class="shade-flex cust">
-                                <span class="num-top">{{creds.get('num')?.value}}</span>
-
-                                <mat-form-field class="example-full-width">
-                                    <mat-icon class="big-font color-red" matPrefix (click)="decreaseNum(i)">
-                                        indeterminate_check_box</mat-icon>
-                                    <input matInput type="text" formControlName="qty">
-                                    <mat-icon class="big-font color-green" matSuffix (click)="increaseNum(i)">add_box
-                                    </mat-icon>
-                                </mat-form-field>
-                            </div>
-                            <div>
-                                <mat-button-toggle-group (change)="changeQty($event, i)" formControlName="sel">
-                                    <mat-button-toggle value="0">0</mat-button-toggle>
-                                    <mat-button-toggle value="5">5</mat-button-toggle>
-                                    <mat-button-toggle value="10">10</mat-button-toggle>
-                                    <mat-button-toggle value="15">15</mat-button-toggle>
-                                    <mat-button-toggle value="20">20</mat-button-toggle>
-                                    <mat-button-toggle value="25">25</mat-button-toggle>
-                                    <mat-button-toggle value="30">30</mat-button-toggle>
-                                </mat-button-toggle-group>
-                            </div> -->
-                    <!--  </ng-container>
-                    </div> -->
                 </form>
-
-
-
-
             </mat-card-content>
 
             <div class="main-page">
