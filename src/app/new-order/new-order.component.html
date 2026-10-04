@@ -1,0 +1,147 @@
+<main class="new-order" [class.review-open]="showingReview">
+  <header #orderHeader class="order-header">
+    <div class="heading">
+      <div>
+        <h1>ચિત્રકૂટ ઓર્ડર</h1>
+        <p>{{ today | date: 'dd-MM-yyyy' }}</p>
+      </div>
+      <div class="heading-tools">
+        <div class="summary" aria-live="polite">
+          <div><span>નંબર</span><strong>{{ orderItems.length }}</strong></div>
+          <div><span>બૉક્સ</span><strong>{{ totalQuantity }}</strong></div>
+        </div>
+        <nav class="version-switch" aria-label="Application version">
+          <a
+            href="#/current"
+            aria-label="Switch to old version with two taps"
+            title="Tap twice to open old version"
+            (click)="switchToOldVersion($event)"
+          >OLD</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button
+        type="button"
+        class="review-button"
+        [disabled]="orderItems.length === 0"
+        [attr.aria-label]="showingReview ? 'Return to color codes' : 'Review selected order'"
+        [title]="showingReview ? 'Return to color codes' : 'Review selected order'"
+        (click)="toggleOrderReview()"
+      >
+        <span aria-hidden="true">{{ showingReview ? 'arrow_upward' : 'swipe_down' }}</span>
+      </button>
+      <button type="button" class="clear-button" (click)="clearOrder()">
+        <span class="clear-icon" aria-hidden="true">delete</span>
+        <span>CLEAR</span>
+      </button>
+      <button type="button" class="pdf-button" [disabled]="orderItems.length === 0" (click)="downloadPdf()">
+        <span class="pdf-icon" aria-hidden="true">picture_as_pdf</span>
+        <span>PDF</span>
+      </button>
+      <button
+        type="button"
+        class="share-button"
+        [disabled]="orderItems.length === 0 || sharing"
+        (click)="shareOrder()"
+      >
+        <span class="share-icon" aria-hidden="true">share</span>
+        <span>{{ sharing ? 'PREPARING…' : 'SHARE' }}</span>
+      </button>
+    </div>
+    <p class="share-message" aria-live="polite" *ngIf="shareMessage">{{ shareMessage }}</p>
+
+    <div class="search">
+      <span class="search-icon" aria-hidden="true">search</span>
+      <input
+        type="text"
+        [ngModel]="searchText"
+        (ngModelChange)="filterShades($event)"
+        placeholder="For example: 7-D"
+        aria-label="રંગ કોડ શોધો"
+      />
+      <button
+        *ngIf="searchText"
+        type="button"
+        class="clear-search"
+        aria-label="શોધ સાફ કરો"
+        title="શોધ સાફ કરો"
+        (click)="filterShades('')"
+      >
+        <span aria-hidden="true">close</span>
+      </button>
+    </div>
+  </header>
+
+  <cdk-virtual-scroll-viewport class="shade-list" itemSize="120">
+    <section
+      class="shade-card"
+      *cdkVirtualFor="let shade of visibleShades; let i = index; trackBy: trackByCode"
+      [formGroup]="shade"
+      [attr.aria-label]="'Color code ' + shade.get('num')?.value"
+      [class.has-selection]="shade.get('qty')?.value > 0"
+    >
+    <strong
+      class="shade-code"
+      [class.shade-code-blue]="i % 2 !== 0"
+    >{{ shade.get('num')?.value }}</strong>
+    <div class="quantity-grid" role="group" [attr.aria-label]="'Quantity for ' + shade.get('num')?.value">
+        <button
+          *ngFor="let quantity of quantities"
+          type="button"
+          [class.selected]="shade.get('qty')?.value === quantity"
+          [class.selected-zero]="quantity === 0 && shade.get('qty')?.value === 0"
+          [attr.aria-pressed]="shade.get('qty')?.value === quantity"
+          (click)="setQuantity(shade, quantity)"
+        >
+          {{ quantity }}
+        </button>
+      </div>
+    </section>
+    <p class="no-results" *ngIf="visibleShades.length === 0">No color codes found.</p>
+  </cdk-virtual-scroll-viewport>
+
+  <section #orderReview class="order-review" aria-labelledby="order-review-title">
+    <h2 id="order-review-title">Selected order</h2>
+    <p class="empty-order" *ngIf="orderItems.length === 0">No color codes selected.</p>
+    <table *ngIf="orderItems.length > 0">
+      <thead>
+        <tr>
+          <th scope="col">Color code</th>
+          <th scope="col">Quantity</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of orderItems">
+          <td>{{ item.num }}</td>
+          <td>{{ item.qty }}</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <th scope="row">Total</th>
+          <td>{{ totalQuantity }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </section>
+  <div *ngIf="showingReview" class="review-scroll-spacer" aria-hidden="true"></div>
+</main>
+
+<div class="confirmation-backdrop" *ngIf="confirmingClear">
+  <section
+    class="confirmation-dialog"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="clear-confirmation-title"
+    aria-describedby="clear-confirmation-message"
+  >
+    <h2 id="clear-confirmation-title">ઓર્ડર સાફ કરવો છે?</h2>
+    <p id="clear-confirmation-message">આ ઓર્ડરમાં પસંદ કરેલી બધી સંખ્યા દૂર થઈ જશે.</p>
+    <div class="confirmation-actions">
+      <button type="button" class="cancel-confirmation" (click)="cancelClear()">ના, પાછા જાઓ</button>
+      <button type="button" class="confirm-clear" (click)="confirmClearOrder()">હા, સાફ કરો</button>
+    </div>
+  </section>
+</div>
